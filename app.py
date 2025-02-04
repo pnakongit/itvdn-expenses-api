@@ -72,8 +72,17 @@ def get_expense(pk: int) -> (Response, 200):
 
 
 @app.route("/expenses/<int:pk>", methods=["PATCH"])
-def update_expense() -> (Response, 200):
-    pass
+def update_expense(pk: int) -> (Response, int):
+    expense = db.get_or_404(Expenses, pk, description="Expense not found")
+    expense.title = request.json.get("title", expense.title)
+    expense.amount = request.json.get("amount", expense.amount)
+    db.session.commit()
+
+    return jsonify({
+        "id": expense.id,
+        "title": expense.title,
+        "amount": expense.amount,
+    }), 200
 
 
 @app.route("/expenses/<int:pk>", methods=["DELETE"])
