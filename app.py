@@ -86,8 +86,12 @@ def update_expense(pk: int) -> (Response, int):
 
 
 @app.route("/expenses/<int:pk>", methods=["DELETE"])
-def delete_expense() -> (Response, 200):
-    pass
+def delete_expense(pk: int) -> (Response, int):
+    expense = db.get_or_404(Expenses, pk, description="Expense not found")
+    db.session.delete(expense)
+    db.session.commit()
+
+    return "", 204
 
 
 if __name__ == "__main__":
