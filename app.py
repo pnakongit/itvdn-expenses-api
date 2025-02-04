@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request, jsonify
 from flask.wrappers import Response
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
@@ -33,8 +33,18 @@ def index() -> (dict, 200):
 
 
 @app.route("/expenses", methods=["POST"])
-def create_expense() -> (Response, 200):
-    pass
+def create_expense() -> (Response, 201):
+    data = request.json
+
+    expense = Expenses(title=data["title"], amount=data["amount"])
+    db.session.add(expense)
+    db.session.commit()
+
+    return jsonify({
+        "id": expense.id,
+        "title": expense.title,
+        "amount": expense.amount,
+    }), 201
 
 
 @app.route("/expenses", methods=["GET"])
