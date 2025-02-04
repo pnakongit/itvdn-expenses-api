@@ -49,7 +49,16 @@ def create_expense() -> (Response, 201):
 
 @app.route("/expenses", methods=["GET"])
 def get_expenses() -> (Response, 200):
-    pass
+    expenses = Expenses.query.all()
+    expenses = [
+        {
+            "id": expense.id,
+            "title": expense.title,
+            "amount": expense.amount,
+        }
+        for expense in expenses
+    ]
+    return jsonify(expenses), 200
 
 
 @app.route("/expenses/<int:pk>", methods=["GET"])
