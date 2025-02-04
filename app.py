@@ -28,7 +28,7 @@ class Expenses(db.Model):
 
 
 @app.route('/')
-def index() -> (dict, 200):
+def index() -> (dict, int):
     return {"message": "Hello from Expenses API!"}, 200
 
 
@@ -48,7 +48,7 @@ def create_expense() -> (Response, 201):
 
 
 @app.route("/expenses", methods=["GET"])
-def get_expenses() -> (Response, 200):
+def get_expenses() -> (Response, int):
     expenses = Expenses.query.all()
     expenses = [
         {
@@ -62,7 +62,7 @@ def get_expenses() -> (Response, 200):
 
 
 @app.route("/expenses/<int:pk>", methods=["GET"])
-def get_expense(pk: int) -> (Response, 200):
+def get_expense(pk: int) -> (Response, int):
     expense = db.get_or_404(Expenses, pk, description="Expense not found")
     return jsonify({
         "id": expense.id,
