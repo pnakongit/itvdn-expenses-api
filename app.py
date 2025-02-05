@@ -1,7 +1,8 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 from flask.wrappers import Response
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from werkzeug.exceptions import NotFound
 
 DATABASE_URI = "sqlite:///expenses.sqlite3"
 
@@ -91,6 +92,18 @@ def delete_expense(pk: int) -> (Response, int):
     db.session.commit()
 
     return "", 204
+
+
+@app.errorhandler(NotFound)
+def handle_not_fount(e: NotFound) -> (Response, int):
+    data = {
+        "error": {
+            "code": e.code,
+            "name": e.name,
+            "description": e.description,
+        }
+    }
+    return jsonify(data), e.code
 
 
 if __name__ == "__main__":
