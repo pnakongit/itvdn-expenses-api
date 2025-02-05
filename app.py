@@ -48,6 +48,26 @@ def index() -> (dict, int):
 
 @app.route("/expenses", methods=["POST"])
 def create_expense() -> (Response, 201):
+    """
+    Create a new expense
+    You can create a new expense by passing its title and amount in
+
+    ---
+    tags:
+      - expenses
+    parameters:
+      - in: body
+        name: Expenses
+        description: Expenses title and amount
+        schema:
+          $ref: "#definitions/ExpenseIn"
+        required: true
+    responses:
+      201:
+        description: Created
+        schema:
+          $ref: "#definitions/ExpenseOut"
+    """
     data = request.json
 
     expense = Expenses(title=data["title"], amount=data["amount"])
@@ -132,6 +152,30 @@ def spec() -> Response:
             "properties": {"message": {"type": "string"}},
             "example": {"message": "Hello from Expenses API!"},
         },
+        "ExpenseIn": {
+            "type": "object",
+            "discriminator": "expenseInType",
+            "properties": {
+                "title": {"type": "string"},
+                "amount": {"type": "number"}
+            },
+            "example": {
+                "title": "I'm your expense", "amount": 5.21
+            },
+        },
+        "ExpenseOut": {
+            "allOf": [
+                {"$ref": "#/definitions/ExpenseIn"},
+                {
+                    "properties": {
+                        "id": {"type": "integer"},
+                    },
+                    "example": {
+                        "id": 1,
+                    }
+                }
+            ]
+        }
     }
     return jsonify(swag)
 
