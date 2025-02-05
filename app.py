@@ -181,6 +181,27 @@ def update_expense(pk: int) -> (Response, int):
 
 @app.route("/expenses/<int:pk>", methods=["DELETE"])
 def delete_expense(pk: int) -> (Response, int):
+    """
+    Delete an expense
+    You can delete an expense by passing its ID to path
+
+    ---
+    tags:
+      - expenses
+    parameters:
+      - in: path
+        name: pk
+        type: integer
+        description: Expense ID
+        required: true
+    responses:
+      204:
+        description: Not content
+      404:
+        schema:
+          $ref: "#definitions/NotFound"
+
+    """
     expense = db.get_or_404(Expenses, pk, description="Expense not found")
     db.session.delete(expense)
     db.session.commit()
