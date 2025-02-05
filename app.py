@@ -3,6 +3,8 @@ from flask.wrappers import Response
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from werkzeug.exceptions import NotFound
+from flask_swagger import swagger
+from flask_swagger_ui import get_swaggerui_blueprint
 
 DATABASE_URI = "sqlite:///expenses.sqlite3"
 
@@ -29,6 +31,18 @@ class Expenses(db.Model):
 
 @app.route('/')
 def index() -> (dict, int):
+    """
+    Return a greeting message
+    Test endpoint to see if it works
+    ---
+    tags:
+    - tests
+    responses:
+      200:
+        description: Greeting
+        schema:
+          $ref: "#definitions/Greeting"
+    """
     return {"message": "Hello from Expenses API!"}, 200
 
 
@@ -105,6 +119,29 @@ def handle_not_fount(e: NotFound) -> (Response, int):
     }
     return jsonify(data), e.code
 
+
+@app.route("/spec")
+def spec() -> Response:
+    swag = swagger(app)
+    swag['info']['version'] = "1.0"
+    swag['info']['title'] = "My API"
+    swag["definitions"] = {
+        "Greeting": {
+            "type": "object",
+            "discriminator": "greetingType",
+            "properties": {"message": {"type": "string"}},
+            "example": {"message": "Hello from Expenses API!"},
+        },
+    }
+    return jsonify(swag)
+
+
+swagger_ui_bd = get_swaggerui_blueprint(
+    base_url="/swagger-ui",
+    api_url="/spec"
+)
+
+app.register_blueprint(swagger_ui_bd)
 
 if __name__ == "__main__":
     with app.app_context():
