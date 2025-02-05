@@ -143,6 +143,30 @@ def get_expense(pk: int) -> (Response, int):
 
 @app.route("/expenses/<int:pk>", methods=["PATCH"])
 def update_expense(pk: int) -> (Response, int):
+    """
+        Update an expense
+        You can update an expense by passing its title or amount in
+        ---
+        tags:
+          - expenses
+        parameters:
+          - in: path
+            name: pk
+            type: integer
+            description: Expense ID
+            required: true
+          - in: body
+            name: Expenses
+            description: Expenses title and amount
+            required: true
+            schema:
+              $ref: "#definitions/ExpensePatch"
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: "#definitions/ExpenseOut"
+        """
     expense = db.get_or_404(Expenses, pk, description="Expense not found")
     expense.title = request.json.get("title", expense.title)
     expense.amount = request.json.get("amount", expense.amount)
@@ -231,6 +255,18 @@ def spec() -> Response:
                     "name": "Not Found",
                     "description": "Not found"
                 }
+            },
+        },
+        "ExpensePatch": {
+            "type": "object",
+            "discriminator": "expensePatchType",
+            "properties": {
+                "title": {"type": "string"},
+                "amount": {"type": "number"}
+            },
+            "required": [],
+            "example": {
+                "title": "I'm your expense", "amount": 5.21
             },
         },
     }
