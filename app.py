@@ -111,6 +111,28 @@ def get_expenses() -> (Response, int):
 
 @app.route("/expenses/<int:pk>", methods=["GET"])
 def get_expense(pk: int) -> (Response, int):
+    """
+    Get an expense
+    Return a single expense
+    ---
+    tags:
+      - expenses
+    parameters:
+      - in: path
+        name: pk
+        type: integer
+        description: Expense ID
+        required: true
+    responses:
+      200:
+        description: Return a single expense
+        schema:
+          $ref: "#definitions/ExpenseOut"
+      404:
+        description: Not found
+        schema:
+          $ref: "#definitions/NotFound"
+    """
     expense = db.get_or_404(Expenses, pk, description="Expense not found")
     return jsonify({
         "id": expense.id,
