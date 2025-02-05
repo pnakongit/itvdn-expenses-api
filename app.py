@@ -83,6 +83,20 @@ def create_expense() -> (Response, 201):
 
 @app.route("/expenses", methods=["GET"])
 def get_expenses() -> (Response, int):
+    """
+    Get all expenses
+    Return a list of all expenses
+    ---
+    tags:
+      - expenses
+    responses:
+      200:
+        description: List of all expenses
+        schema:
+          type: array
+          items:
+            $ref: "#definitions/ExpenseOut"
+    """
     expenses = Expenses.query.all()
     expenses = [
         {
