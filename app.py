@@ -189,7 +189,28 @@ def spec() -> Response:
                     }
                 }
             ]
-        }
+        },
+        "NotFound": {
+            "type": "object",
+            "discriminator": "notFoundType",
+            "properties":
+                {"error": {
+                    "type": "object",
+                    "discriminator": "errorType",
+                    "properties": {
+                        "code": {"type": "integer"},
+                        "name": {"type": "string"},
+                        "description": {"type": "string"},
+                    }
+                }},
+            "example": {
+                "error": {
+                    "code": 404,
+                    "name": "Not Found",
+                    "description": "Not found"
+                }
+            },
+        },
     }
     return jsonify(swag)
 
