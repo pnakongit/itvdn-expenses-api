@@ -1,5 +1,6 @@
 from flask import Flask, Response, jsonify
 from werkzeug.exceptions import NotFound
+from marshmallow import ValidationError
 
 DATABASE_URI = "sqlite:///expenses.sqlite3"
 SPEC_URL = "/spec"
@@ -42,8 +43,9 @@ def create_app() -> Flask:
         """
         return {"message": "Hello from Expenses API!"}, 200
 
-    from app.error_handlers import handle_not_fount
+    from app.error_handlers import handle_not_fount, handle_schema_errors
     app.register_error_handler(NotFound, handle_not_fount)
+    app.register_error_handler(ValidationError, handle_schema_errors)
 
     with app.app_context():
         db.create_all()
