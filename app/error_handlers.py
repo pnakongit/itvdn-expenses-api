@@ -1,5 +1,6 @@
 from flask import Response, jsonify
 from werkzeug.exceptions import NotFound
+from marshmallow import ValidationError
 
 
 def handle_not_fount(e: NotFound) -> (Response, int):
@@ -11,3 +12,7 @@ def handle_not_fount(e: NotFound) -> (Response, int):
         }
     }
     return jsonify(data), e.code
+
+
+def handle_schema_errors(e: ValidationError) -> (Response, int):
+    return jsonify(errors=e.messages_dict), 400

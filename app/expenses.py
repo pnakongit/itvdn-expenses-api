@@ -1,5 +1,7 @@
 from flask import blueprints, request, jsonify, Response
+
 from app.db import db, Expenses
+from app.schemas import expense_schema, expense_update_schema, expenses_schema
 
 bp = blueprints.Blueprint("expenses", __name__, url_prefix="/expenses")
 
@@ -26,9 +28,11 @@ def create_expense() -> (Response, 201):
         schema:
           $ref: "#definitions/ExpenseOut"
     """
-    data = request.json
 
-    expense = Expenses(title=data["title"], amount=data["amount"])
+    data = expense_schema.load(request.json)
+
+    expense = Expenses(**expense_schema.load(data))
+
     db.session.add(expense)
     db.session.commit()
 
@@ -56,15 +60,8 @@ def get_expenses() -> (Response, int):
             $ref: "#definitions/ExpenseOut"
     """
     expenses = Expenses.query.all()
-    expenses = [
-        {
-            "id": expense.id,
-            "title": expense.title,
-            "amount": expense.amount,
-        }
-        for expense in expenses
-    ]
-    return jsonify(expenses), 200
+    data = expenses_schema.dump(expenses)
+    return jsonify(data), 200
 
 
 @bp.route("/<int:pk>", methods=["GET"])
@@ -92,11 +89,8 @@ def get_expense(pk: int) -> (Response, int):
           $ref: "#definitions/NotFound"
     """
     expense = db.get_or_404(Expenses, pk, description="Expense not found")
-    return jsonify({
-        "id": expense.id,
-        "title": expense.title,
-        "amount": expense.amount,
-    }), 200
+    data = expense_schema.dump(expense)
+    return jsonify(data), 200
 
 
 @bp.route("/<int:pk>", methods=["PATCH"])
@@ -126,15 +120,12 @@ def update_expense(pk: int) -> (Response, int):
               $ref: "#definitions/ExpenseOut"
         """
     expense = db.get_or_404(Expenses, pk, description="Expense not found")
-    expense.title = request.json.get("title", expense.title)
-    expense.amount = request.json.get("amount", expense.amount)
+    data = expense_update_schema.load(request.json)
+    expense.title = data.get("title", expense.title)
+    expense.amount = data.get("amount", expense.amount)
     db.session.commit()
 
-    return jsonify({
-        "id": expense.id,
-        "title": expense.title,
-        "amount": expense.amount,
-    }), 200
+    return jsonify(expense_schema.dump(expense)), 200
 
 
 @bp.route("/<int:pk>", methods=["DELETE"])
