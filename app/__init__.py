@@ -12,7 +12,10 @@ def create_app() -> Flask:
     app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
 
     from app.db import db
+    from app.migrate import migrate
+
     db.init_app(app)
+    migrate.init_app(app, db)
 
     from app.expenses import bp as expenses_bp
     from app.swagger_bp import swagger_ui_bd
@@ -46,8 +49,5 @@ def create_app() -> Flask:
     from app.error_handlers import handle_not_fount, handle_schema_errors
     app.register_error_handler(NotFound, handle_not_fount)
     app.register_error_handler(ValidationError, handle_schema_errors)
-
-    with app.app_context():
-        db.create_all()
 
     return app
