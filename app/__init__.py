@@ -15,7 +15,7 @@ def create_app() -> Flask:
     from app.migrate import migrate
 
     db.init_app(app)
-    migrate.init_app(app, db)
+    migrate.init_app(app, db, render_as_batch=True)
 
     from app.expenses import bp as expenses_bp
     from app.swagger_bp import swagger_ui_bd
