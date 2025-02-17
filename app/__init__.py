@@ -1,7 +1,7 @@
 import datetime
 
 from flask import Flask, Response, jsonify
-from werkzeug.exceptions import NotFound, Unauthorized
+from werkzeug.exceptions import NotFound, Unauthorized, Forbidden
 from marshmallow import ValidationError
 
 DATABASE_URI = "sqlite:///expenses.sqlite3"
@@ -57,8 +57,15 @@ def create_app() -> Flask:
         """
         return {"message": "Hello from Expenses API!"}, 200
 
-    from app.error_handlers import handle_not_fount, handle_schema_errors, handle_unauthorized
+    from app.error_handlers import (
+        handle_not_fount,
+        handle_schema_errors,
+        handle_unauthorized,
+        handle_forbidden
+    )
+
     app.register_error_handler(NotFound, handle_not_fount)
     app.register_error_handler(ValidationError, handle_schema_errors)
     app.register_error_handler(Unauthorized, handle_unauthorized)
+    app.register_error_handler(Forbidden, handle_forbidden)
     return app
