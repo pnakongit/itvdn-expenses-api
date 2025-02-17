@@ -1,3 +1,5 @@
+import datetime
+
 from flask import Flask, Response, jsonify
 from werkzeug.exceptions import NotFound
 from marshmallow import ValidationError
@@ -5,17 +7,24 @@ from marshmallow import ValidationError
 DATABASE_URI = "sqlite:///expenses.sqlite3"
 SPEC_URL = "/spec"
 BASE_SWAGGER_URL = "/swagger"
-
+JWT_SECRET_KEY = "Test JWT"
+JWT_REFRESH_TOKEN_EXPIRES = datetime.timedelta(hours=1)
+JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(minutes=5)
 
 def create_app() -> Flask:
     app = Flask(__name__)
     app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
+    app.config["JWT_SECRET_KEY"] = JWT_SECRET_KEY
+    app.config["JWT_REFRESH_TOKEN_EXPIRES"] = JWT_REFRESH_TOKEN_EXPIRES
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = JWT_ACCESS_TOKEN_EXPIRES
 
     from app.db import db
     from app.migrate import migrate
+    from app.jwt import jwt
 
     db.init_app(app)
     migrate.init_app(app, db, render_as_batch=True)
+    jwt.init_app(app)
 
     from app.expenses import bp as expenses_bp
     from app.swagger_bp import swagger_ui_bd
