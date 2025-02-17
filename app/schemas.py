@@ -13,6 +13,12 @@ expense_update_schema = ExpenseSchema(partial=True)
 expenses_schema = ExpenseSchema(many=True)
 
 
+class UserSchemaLogin(Schema):
+    id = fields.Integer(dump_only=True)
+    username = fields.Str(required=True, validate=validate.Length(min=4, max=20))
+    password = fields.Str(load_only=True, required=True, validate=validate.Length(min=4))
+
+
 class UserSchema(Schema):
     id = fields.Integer(dump_only=True)
     username = fields.Str(required=True, validate=validate.Length(min=4, max=20))
@@ -26,3 +32,4 @@ class UserSchema(Schema):
 
 
 user_schema = UserSchema()
+user_schema_login = UserSchemaLogin()
