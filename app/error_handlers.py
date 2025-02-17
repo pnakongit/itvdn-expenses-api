@@ -1,5 +1,5 @@
 from flask import Response, jsonify
-from werkzeug.exceptions import NotFound, Unauthorized
+from werkzeug.exceptions import NotFound, Unauthorized, Forbidden
 from marshmallow import ValidationError
 
 
@@ -19,6 +19,17 @@ def handle_schema_errors(e: ValidationError) -> (Response, int):
 
 
 def handle_unauthorized(e: Unauthorized) -> (Response, int):
+    data = {
+        "error": {
+            "code": e.code,
+            "name": e.name,
+            "description": e.description,
+        }
+    }
+    return jsonify(data), e.code
+
+
+def handle_forbidden(e: Unauthorized) -> (Response, int):
     data = {
         "error": {
             "code": e.code,
