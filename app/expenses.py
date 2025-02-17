@@ -151,6 +151,7 @@ def update_expense(pk: int) -> (Response, int):
 
 
 @bp.route("/<int:pk>", methods=["DELETE"])
+@jwt_required()
 def delete_expense(pk: int) -> (Response, int):
     """
     Delete an expense
@@ -174,6 +175,10 @@ def delete_expense(pk: int) -> (Response, int):
 
     """
     expense = db.get_or_404(Expenses, pk, description="Expense not found")
+    if expense.user_id != current_user.id:
+        raise Forbidden(
+            description="You are not authorized to delete this expense"
+        )
     db.session.delete(expense)
     db.session.commit()
 
