@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy import MetaData, CheckConstraint
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 class Base(DeclarativeBase):
@@ -32,6 +33,12 @@ class User(db.Model):
 
     def __repr__(self) -> str:
         return f"<User {self.id} {self.username}>"
+
+    def set_password(self, password: str) -> None:
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password: str) -> bool:
+        return check_password_hash(self.password, password)
 
 
 class Expenses(db.Model):
