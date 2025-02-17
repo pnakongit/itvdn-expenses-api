@@ -1,5 +1,6 @@
 from flask import blueprints, request, jsonify, Response
 from flask_jwt_extended import jwt_required, current_user
+from werkzeug.exceptions import Forbidden
 
 from app.db import db, Expenses
 from app.schemas import (
@@ -73,6 +74,7 @@ def get_expenses() -> (Response, int):
 
 
 @bp.route("/<int:pk>", methods=["GET"])
+@jwt_required()
 def get_expense(pk: int) -> (Response, int):
     """
     Get an expense
@@ -97,7 +99,12 @@ def get_expense(pk: int) -> (Response, int):
           $ref: "#definitions/NotFound"
     """
     expense = db.get_or_404(Expenses, pk, description="Expense not found")
-    data = expense_schema.dump(expense)
+
+    if expense.user_id != current_user.id:
+        raise Forbidden(
+            description="You are not authorized to view this expense"
+        )
+    data = expense_out_schema.dump(expense)
     return jsonify(data), 200
 
 
