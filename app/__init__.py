@@ -19,9 +19,11 @@ def create_app() -> Flask:
 
     from app.expenses import bp as expenses_bp
     from app.swagger_bp import swagger_ui_bd
+    from app.auth import bp as auth_bp
 
     app.register_blueprint(expenses_bp)
     app.register_blueprint(swagger_ui_bd)
+    app.register_blueprint(auth_bp)
 
     from app.swagger_utils import create_swagger_spec
 
