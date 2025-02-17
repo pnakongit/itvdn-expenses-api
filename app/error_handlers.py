@@ -29,7 +29,7 @@ def handle_unauthorized(e: Unauthorized) -> (Response, int):
     return jsonify(data), e.code
 
 
-def handle_forbidden(e: Unauthorized) -> (Response, int):
+def handle_forbidden(e: Forbidden) -> (Response, int):
     data = {
         "error": {
             "code": e.code,
