@@ -8,7 +8,12 @@ class ExpenseSchema(Schema):
     amount = fields.Float(required=True, validate=validate.Range(min=0))
 
 
+class ExpenseOutSchema(ExpenseSchema):
+    user_id = fields.Integer(dump_only=True)
+
+
 expense_schema = ExpenseSchema()
+expense_out_schema = ExpenseOutSchema()
 expense_update_schema = ExpenseSchema(partial=True)
 expenses_schema = ExpenseSchema(many=True)
 
