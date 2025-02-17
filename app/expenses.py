@@ -5,8 +5,7 @@ from app.db import db, Expenses
 from app.schemas import (
     expense_schema,
     expense_out_schema,
-    expense_update_schema,
-    expenses_schema,
+    expense_update_schema, expenses_out_schema,
 )
 
 bp = blueprints.Blueprint("expenses", __name__, url_prefix="/expenses")
@@ -52,6 +51,7 @@ def create_expense() -> (Response, 201):
 
 
 @bp.route("/", methods=["GET"])
+@jwt_required()
 def get_expenses() -> (Response, int):
     """
     Get all expenses
@@ -67,8 +67,8 @@ def get_expenses() -> (Response, int):
           items:
             $ref: "#definitions/ExpenseOut"
     """
-    expenses = Expenses.query.all()
-    data = expenses_schema.dump(expenses)
+
+    data = expenses_out_schema.dump(current_user.expenses)
     return jsonify(data), 200
 
 
