@@ -2,6 +2,7 @@ from flask import Blueprint, Response, request, jsonify
 from werkzeug.security import generate_password_hash
 from flask_jwt_extended import create_access_token, create_refresh_token
 from werkzeug.exceptions import Unauthorized
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from app.db import db, User
 from app.schemas import user_schema, user_schema_login
@@ -46,3 +47,11 @@ def login() -> (Response, int):
     return jsonify(
         access_token=access_token, refresh_token=refresh_token
     ), 200
+
+
+@bp.route("/refresh", methods=["POST"])
+@jwt_required(refresh=True)
+def refresh() -> (Response, int):
+    identity = get_jwt_identity()
+    access_token = create_access_token(identity=identity)
+    return jsonify(access_token=access_token), 200
