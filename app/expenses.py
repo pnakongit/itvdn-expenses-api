@@ -1,12 +1,19 @@
 from flask import blueprints, request, jsonify, Response
+from flask_jwt_extended import jwt_required, current_user
 
 from app.db import db, Expenses
-from app.schemas import expense_schema, expense_update_schema, expenses_schema
+from app.schemas import (
+    expense_schema,
+    expense_out_schema,
+    expense_update_schema,
+    expenses_schema,
+)
 
 bp = blueprints.Blueprint("expenses", __name__, url_prefix="/expenses")
 
 
 @bp.route("/", methods=["POST"])
+@jwt_required()
 def create_expense() -> (Response, 201):
     """
     Create a new expense
@@ -31,16 +38,17 @@ def create_expense() -> (Response, 201):
 
     data = expense_schema.load(request.json)
 
-    expense = Expenses(**expense_schema.load(data))
+    expense = Expenses(
+        user_id=current_user.id,
+        **expense_schema.load(data)
+    )
 
     db.session.add(expense)
     db.session.commit()
 
-    return jsonify({
-        "id": expense.id,
-        "title": expense.title,
-        "amount": expense.amount,
-    }), 201
+    return jsonify(
+        expense_out_schema.dump(expense)
+    ), 201
 
 
 @bp.route("/", methods=["GET"])
