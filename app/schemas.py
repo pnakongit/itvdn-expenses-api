@@ -14,8 +14,8 @@ class ExpenseOutSchema(ExpenseSchema):
 
 expense_schema = ExpenseSchema()
 expense_out_schema = ExpenseOutSchema()
+expenses_out_schema = ExpenseOutSchema(many=True)
 expense_update_schema = ExpenseSchema(partial=True)
-expenses_schema = ExpenseSchema(many=True)
 
 
 class UserSchemaLogin(Schema):
