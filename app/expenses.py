@@ -109,6 +109,7 @@ def get_expense(pk: int) -> (Response, int):
 
 
 @bp.route("/<int:pk>", methods=["PATCH"])
+@jwt_required()
 def update_expense(pk: int) -> (Response, int):
     """
         Update an expense
@@ -135,12 +136,18 @@ def update_expense(pk: int) -> (Response, int):
               $ref: "#definitions/ExpenseOut"
         """
     expense = db.get_or_404(Expenses, pk, description="Expense not found")
+
+    if expense.user_id != current_user.id:
+        raise Forbidden(
+            description="You are not authorized to patch this expense"
+        )
+
     data = expense_update_schema.load(request.json)
     expense.title = data.get("title", expense.title)
     expense.amount = data.get("amount", expense.amount)
     db.session.commit()
 
-    return jsonify(expense_schema.dump(expense)), 200
+    return jsonify(expense_out_schema.dump(expense)), 200
 
 
 @bp.route("/<int:pk>", methods=["DELETE"])
