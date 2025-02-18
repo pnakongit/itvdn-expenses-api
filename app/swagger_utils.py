@@ -6,6 +6,13 @@ def create_swagger_spec(app: Flask) -> dict:
     swag = swagger(app)
     swag['info']['version'] = "1.0"
     swag['info']['title'] = "My API"
+    swag["securityDefinitions"] = {
+        "BearerAuth": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "Authorization",
+        }
+    }
     swag["definitions"] = {
         "Greeting": {
             "type": "object",
