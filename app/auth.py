@@ -50,6 +50,26 @@ def register() -> (Response, int):
 
 @bp.route("/login", methods=["POST"])
 def login() -> (Response, int):
+    """
+    Register a user
+    You can register a user with this endpoint
+
+    ---
+    tags:
+      - auth
+    parameters:
+      - in: body
+        name: UserLogin
+        description: Get access token and refresh token
+        schema:
+          $ref: "#definitions/LoginIn"
+        required: true
+    responses:
+      201:
+        description: Created
+        schema:
+          $ref: "#definitions/LoginOut"
+    """
     json_data = request.get_json()
     data = user_schema_login.load(json_data)
 
@@ -67,7 +87,7 @@ def login() -> (Response, int):
 
     return jsonify(
         access_token=access_token, refresh_token=refresh_token
-    ), 200
+    ), 201
 
 
 @bp.route("/refresh", methods=["POST"])
