@@ -105,6 +105,16 @@ def create_swagger_spec(app: Flask) -> dict:
                 "refresh_token": "YOUR REFRESH TOKEN",
             },
         },
+        "RefreshOut": {
+            "type": "object",
+            "discriminator": "RefreshOutType",
+            "properties": {
+                "access_token": {"type": "string"},
+            },
+            "example": {
+                "access_token": "YOUR ACCESS TOKEN",
+            },
+        },
         "UserOut": {
             "type": "object",
             "discriminator": "UserOutType",
