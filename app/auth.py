@@ -12,6 +12,27 @@ bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 @bp.route("/register", methods=["POST"])
 def register() -> (Response, int):
+    """
+    Register a user
+    You can register a user with this endpoint
+
+    ---
+    tags:
+      - auth
+    parameters:
+      - in: body
+        name: Users
+        description: Create a new user
+        schema:
+          $ref: "#definitions/UserIn"
+        required: true
+    responses:
+      201:
+        description: Created
+        schema:
+          $ref: "#definitions/UserOut"
+    """
+
     json_data = request.get_json()
 
     data = user_schema.load(json_data)
