@@ -20,6 +20,8 @@ def create_expense() -> (Response, 201):
     You can create a new expense by passing its title and amount in
 
     ---
+    security:
+      - BearerAuth: []
     tags:
       - expenses
     parameters:
@@ -57,7 +59,10 @@ def get_expenses() -> (Response, int):
     """
     Get all expenses
     Return a list of all expenses
+
     ---
+    security:
+      - BearerAuth: []
     tags:
       - expenses
     responses:
@@ -79,7 +84,10 @@ def get_expense(pk: int) -> (Response, int):
     """
     Get an expense
     Return a single expense
+
     ---
+    security:
+      - BearerAuth: []
     tags:
       - expenses
     parameters:
@@ -114,7 +122,10 @@ def update_expense(pk: int) -> (Response, int):
     """
         Update an expense
         You can update an expense by passing its title or amount in
+
         ---
+        security:
+          - BearerAuth: []
         tags:
           - expenses
         parameters:
@@ -158,6 +169,8 @@ def delete_expense(pk: int) -> (Response, int):
     You can delete an expense by passing its ID to path
 
     ---
+    security:
+      - BearerAuth: []
     tags:
       - expenses
     parameters:
