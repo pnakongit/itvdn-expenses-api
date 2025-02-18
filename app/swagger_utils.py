@@ -39,6 +39,54 @@ def create_swagger_spec(app: Flask) -> dict:
                 }
             ]
         },
+        "ExpensePatch": {
+            "type": "object",
+            "discriminator": "expensePatchType",
+            "properties": {
+                "title": {"type": "string"},
+                "amount": {"type": "number"}
+            },
+            "required": [],
+            "example": {
+                "title": "I'm your expense", "amount": 5.21
+            },
+        },
+        "UserIn": {
+            "type": "object",
+            "discriminator": "UserInType",
+            "properties": {
+                "username": {
+                    "type": "string",
+                    "unique": True,
+                    "minLength": 4,
+                    "maxLength": 20,
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 4,
+                }
+            },
+            "example": {
+                "username": "<USERNAME>",
+                "password": "<PASSWORD>"
+            },
+        },
+        "UserOut": {
+            "type": "object",
+            "discriminator": "UserOutType",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
+                },
+            },
+            "example": {
+                "id": 1,
+                "username": "YOUR_USERNAME",
+            },
+        },
         "NotFound": {
             "type": "object",
             "discriminator": "notFoundType",
@@ -57,20 +105,9 @@ def create_swagger_spec(app: Flask) -> dict:
                     "code": 404,
                     "name": "Not Found",
                     "description": "Not found"
-                }
-            },
-        },
-        "ExpensePatch": {
-            "type": "object",
-            "discriminator": "expensePatchType",
-            "properties": {
-                "title": {"type": "string"},
-                "amount": {"type": "number"}
-            },
-            "required": [],
-            "example": {
-                "title": "I'm your expense", "amount": 5.21
+                },
             },
         },
     }
+
     return swag
