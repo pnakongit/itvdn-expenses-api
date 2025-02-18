@@ -71,6 +71,33 @@ def create_swagger_spec(app: Flask) -> dict:
                 "password": "<PASSWORD>"
             },
         },
+        "LoginIn": {
+            "allOf": [
+                {"$ref": "#/definitions/UserIn"},
+                {
+                    "discriminator": "LoginType",
+                    "properties": {
+                        "username": {
+                            "type": "string",
+                            "minLength": 4,
+                            "maxLength": 20,
+                        },
+                    }
+                }
+            ]
+        },
+        "LoginOut": {
+            "type": "object",
+            "discriminator": "LoginType",
+            "properties": {
+                "access_token": {"type": "string"},
+                "refresh_token": {"type": "string"},
+            },
+            "example": {
+                "access_token": "YOUR ACCESS TOKEN",
+                "refresh_token": "YOUR REFRESH TOKEN",
+            },
+        },
         "UserOut": {
             "type": "object",
             "discriminator": "UserOutType",
