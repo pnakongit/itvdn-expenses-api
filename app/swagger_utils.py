@@ -30,9 +30,11 @@ def create_swagger_spec(app: Flask) -> dict:
                 {
                     "properties": {
                         "id": {"type": "integer"},
+                        "user_id": {"type": "integer"},
                     },
                     "example": {
                         "id": 1,
+                        "user_id": 1,
                     }
                 }
             ]
