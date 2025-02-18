@@ -51,8 +51,7 @@ def register() -> (Response, int):
 @bp.route("/login", methods=["POST"])
 def login() -> (Response, int):
     """
-    Register a user
-    You can register a user with this endpoint
+    Get access token and refresh token
 
     ---
     tags:
@@ -60,7 +59,7 @@ def login() -> (Response, int):
     parameters:
       - in: body
         name: UserLogin
-        description: Get access token and refresh token
+        description: Provide user login & password
         schema:
           $ref: "#definitions/LoginIn"
         required: true
@@ -93,6 +92,21 @@ def login() -> (Response, int):
 @bp.route("/refresh", methods=["POST"])
 @jwt_required(refresh=True)
 def refresh() -> (Response, int):
+    """
+        Refresh token
+        You can refresh a token with this endpoint
+
+        ---
+        security:
+           - BearerAuth: []
+        tags:
+          - auth
+        responses:
+          200:
+            description: Created
+            schema:
+              $ref: "#definitions/RefreshOut"
+        """
     identity = get_jwt_identity()
     access_token = create_access_token(identity=identity)
     return jsonify(access_token=access_token), 200
