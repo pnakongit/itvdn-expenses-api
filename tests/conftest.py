@@ -5,6 +5,7 @@ from flask import Flask
 
 from app import create_app
 from app.db import db, User, Expenses
+from app.schemas import UserSchema
 
 
 @pytest.fixture(scope="module")
@@ -54,3 +55,6 @@ def clear_db(init_database) -> None:
         db.session.execute(table.delete())
     db.session.commit()
 
+@pytest.fixture
+def user_schema() -> UserSchema:
+    return UserSchema()
