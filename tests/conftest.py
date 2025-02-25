@@ -1,7 +1,7 @@
 import os
 import pytest
 
-from flask import Flask
+from flask import Flask, url_for
 from flask_jwt_extended import create_access_token, create_refresh_token
 
 from app import create_app
@@ -26,8 +26,6 @@ def init_database(test_client) -> None:
     db.drop_all()
 
 
-
-
 @pytest.fixture
 def default_user(init_database) -> User:
     user = User(username="test_username")
@@ -37,6 +35,7 @@ def default_user(init_database) -> User:
     db.session.commit()
 
     return user
+
 
 @pytest.fixture
 def default_expense(default_user) -> Expenses:
@@ -71,3 +70,17 @@ def default_user_access_token(default_user) -> str:
 @pytest.fixture
 def default_user_refresh_token(default_user: User) -> str:
     return create_refresh_token(identity=default_user.id)
+
+
+@pytest.fixture
+def registration_url() -> str:
+    return url_for("auth.register")
+
+
+@pytest.fixture
+def login_url() -> str:
+    return url_for("auth.login")
+
+@pytest.fixture
+def refresh_token_url() -> str:
+    return url_for("auth.refresh")
