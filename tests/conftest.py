@@ -2,6 +2,7 @@ import os
 import pytest
 
 from flask import Flask
+from flask_jwt_extended import create_access_token, create_refresh_token
 
 from app import create_app
 from app.db import db, User, Expenses
@@ -60,3 +61,13 @@ def clear_db(init_database) -> None:
 @pytest.fixture
 def user_schema() -> UserSchema:
     return UserSchema()
+
+
+@pytest.fixture
+def default_user_access_token(default_user) -> str:
+    return create_access_token(identity=default_user.id)
+
+
+@pytest.fixture
+def default_user_refresh_token(default_user: User) -> str:
+    return create_refresh_token(identity=default_user.id)
