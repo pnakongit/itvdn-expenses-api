@@ -54,6 +54,8 @@ def clear_db(init_database) -> None:
     for table in reversed(db.metadata.sorted_tables):
         db.session.execute(table.delete())
     db.session.commit()
+    db.session.close()
+
 
 @pytest.fixture
 def user_schema() -> UserSchema:
