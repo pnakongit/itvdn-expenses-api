@@ -73,6 +73,11 @@ def default_user_refresh_token(default_user: User) -> str:
 
 
 @pytest.fixture
+def headers_with_access_token(default_user_access_token) -> dict:
+    return {"Authorization": f"Bearer {default_user_access_token}"}
+
+
+@pytest.fixture
 def registration_url() -> str:
     return url_for("auth.register")
 
@@ -81,6 +86,12 @@ def registration_url() -> str:
 def login_url() -> str:
     return url_for("auth.login")
 
+
 @pytest.fixture
 def refresh_token_url() -> str:
     return url_for("auth.refresh")
+
+
+@pytest.fixture
+def create_expense_url() -> str:
+    return url_for("expenses.create_expense")
