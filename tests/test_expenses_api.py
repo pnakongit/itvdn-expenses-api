@@ -6,6 +6,7 @@ from app.db import db, Expenses, User
 from app.schemas import expense_out_schema, expenses_out_schema
 
 GET_EXPENSE_VIEW_NAME = "expenses.get_expense"
+UPDATE_EXPENSE_VIEW_NAME = "expenses.update_expense"
 
 
 def expense_sample(*, user: User, **kwargs) -> Expenses:
@@ -173,3 +174,110 @@ class TestGetExpense:
 
         assert expense.user != default_user
         assert response.status_code == 403
+
+
+class TestUpdateExpense:
+    def test_auth_required(
+            self,
+            test_client,
+            headers_with_access_token,
+            default_expense
+    ) -> None:
+        pay_load = {
+            "title": "New Test Expense",
+            "amount": 100,
+        }
+        update_expense_url = url_for(UPDATE_EXPENSE_VIEW_NAME, pk=default_expense.id)
+        response = test_client.patch(update_expense_url, json=pay_load)
+        assert response.status_code == 401
+
+        response = test_client.patch(update_expense_url, json=pay_load, headers=headers_with_access_token)
+        assert response.status_code == 200
+
+    def test_user_can_update_only_to_own_expenses(
+            self,
+            test_client,
+            headers_with_access_token,
+            default_user
+    ) -> None:
+        payload = {
+            "title": "New Test Expense",
+            "amount": 100,
+        }
+        another_user = User(
+            username="another_user",
+        )
+        another_user.set_password("test_password")
+        db.session.add(another_user)
+
+        expense = expense_sample(user=another_user)
+        db.session.add(expense)
+
+        db.session.commit()
+
+        expense_update_url = url_for(UPDATE_EXPENSE_VIEW_NAME, pk=expense.id)
+        response = test_client.patch(
+            expense_update_url,
+            json=payload,
+            headers=headers_with_access_token
+        )
+
+        assert expense.user != default_user
+        assert response.status_code == 403
+
+    def test_update_with_valid_data(
+            self,
+            test_client,
+            headers_with_access_token,
+            default_expense
+    ) -> None:
+        pay_load = {
+            "title": default_expense.title + "updated",
+            "amount": default_expense.amount + 10,
+        }
+
+        update_expense_url = url_for(UPDATE_EXPENSE_VIEW_NAME, pk=default_expense.id)
+        response = test_client.patch(
+            update_expense_url,
+            json=pay_load,
+            headers=headers_with_access_token
+        )
+
+        expected_expense_data = expense_out_schema.dump(default_expense)
+
+        for field in pay_load:
+            assert getattr(default_expense, field) == pay_load[field]
+
+        assert response.status_code == 200
+        assert response.json == expected_expense_data
+
+    @pytest.mark.parametrize(
+        "field_name, field_value, error_message",
+        [
+            ("title", "", "Length must be between 1 and 50."),
+            ("title", "t" * 51, "Length must be between 1 and 50."),
+            ("title", 1, "Not a valid string."),
+            ("amount", -1, "Must be greater than or equal to 0."),
+            ("amount", "str", "Not a valid number."),
+        ]
+    )
+    def test_update_with_invalid_field(
+            self,
+            test_client,
+            headers_with_access_token,
+            default_expense,
+            field_name,
+            field_value,
+            error_message
+    ) -> None:
+        pay_load = {field_name: field_value}
+
+        update_expense_url = url_for(UPDATE_EXPENSE_VIEW_NAME, pk=default_expense.id)
+        response = test_client.patch(
+            update_expense_url,
+            json=pay_load,
+            headers=headers_with_access_token
+        )
+
+        assert response.status_code == 400
+        assert error_message == response.json["errors"][field_name][0]
