@@ -95,3 +95,8 @@ def refresh_token_url() -> str:
 @pytest.fixture
 def create_expense_url() -> str:
     return url_for("expenses.create_expense")
+
+
+@pytest.fixture
+def expenses_url() -> str:
+    return url_for("expenses.get_expenses")
