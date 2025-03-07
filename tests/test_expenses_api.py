@@ -2,6 +2,14 @@ import pytest
 
 from app.db import db, Expenses
 from app.schemas import expense_out_schema
+from app.db import db, Expenses, User
+
+
+def expense_sample(*, user: User, **kwargs) -> Expenses:
+    title = kwargs.get("title", "test_title")
+    amount = kwargs.get("amount", 1)
+
+    return Expenses(user=user, title=title, amount=amount)
 
 
 class TestExpenseCreate:
