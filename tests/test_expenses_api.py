@@ -1,7 +1,11 @@
 import pytest
 
+from flask import url_for
+
 from app.db import db, Expenses, User
 from app.schemas import expense_out_schema, expenses_out_schema
+
+GET_EXPENSE_VIEW_NAME = "expenses.get_expense"
 
 
 def expense_sample(*, user: User, **kwargs) -> Expenses:
@@ -117,3 +121,55 @@ class TestGetExpenses:
 
         assert response.status_code == 200
         assert response.json == expected_expenses
+
+
+class TestGetExpense:
+    def test_auth_required(
+            self,
+            test_client,
+            headers_with_access_token,
+            default_expense
+    ) -> None:
+        expense_url = url_for("expenses.get_expense", pk=default_expense.id)
+        response = test_client.get(expense_url)
+        assert response.status_code == 401
+
+        response = test_client.get(expense_url, headers=headers_with_access_token)
+        assert response.status_code == 200
+
+    def test_return_expense(
+            self,
+            test_client,
+            headers_with_access_token,
+            default_expense
+    ) -> None:
+        expense_url = url_for(GET_EXPENSE_VIEW_NAME, pk=default_expense.id)
+        response = test_client.get(expense_url, headers=headers_with_access_token)
+
+        expected_expense = expense_out_schema.dump(default_expense)
+
+        assert response.status_code == 200
+        assert response.json == expected_expense
+
+    def test_user_have_access_only_to_own_expenses(
+            self,
+            test_client,
+            headers_with_access_token,
+            default_user
+    ) -> None:
+        another_user = User(
+            username="another_user",
+        )
+        another_user.set_password("test_password")
+        db.session.add(another_user)
+
+        expense = expense_sample(user=another_user)
+        db.session.add(expense)
+
+        db.session.commit()
+
+        expense_url = url_for(GET_EXPENSE_VIEW_NAME, pk=expense.id)
+        response = test_client.get(expense_url, headers=headers_with_access_token)
+
+        assert expense.user != default_user
+        assert response.status_code == 403
