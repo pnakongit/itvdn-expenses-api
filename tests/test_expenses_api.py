@@ -1,8 +1,7 @@
 import pytest
 
-from app.db import db, Expenses
-from app.schemas import expense_out_schema
 from app.db import db, Expenses, User
+from app.schemas import expense_out_schema, expenses_out_schema
 
 
 def expense_sample(*, user: User, **kwargs) -> Expenses:
@@ -77,3 +76,44 @@ class TestExpenseCreate:
 
         assert response.status_code == 400
         assert error_message == response.json["errors"][field_name][0]
+
+
+class TestGetExpenses:
+    def test_auth_required(
+            self,
+            test_client,
+            headers_with_access_token,
+            expenses_url
+    ) -> None:
+        response = test_client.get(expenses_url)
+        assert response.status_code == 401
+
+        response = test_client.get(expenses_url, headers=headers_with_access_token)
+        assert response.status_code == 200
+
+    def test_should_return_all_users_expenses(
+            self,
+            test_client,
+            headers_with_access_token,
+            expenses_url,
+            default_user
+    ) -> None:
+        for _ in range(3):
+            db.session.add(expense_sample(user=default_user))
+
+        another_user = User(
+            username="another_user",
+        )
+        another_user.set_password("test_password")
+        db.session.add(another_user)
+
+        for _ in range(3):
+            db.session.add(expense_sample(user=another_user))
+
+        db.session.commit()
+
+        expected_expenses = expenses_out_schema.dump(default_user.expenses)
+        response = test_client.get(expenses_url, headers=headers_with_access_token)
+
+        assert response.status_code == 200
+        assert response.json == expected_expenses
