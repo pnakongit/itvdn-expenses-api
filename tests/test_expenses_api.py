@@ -7,6 +7,7 @@ from app.schemas import expense_out_schema, expenses_out_schema
 
 GET_EXPENSE_VIEW_NAME = "expenses.get_expense"
 UPDATE_EXPENSE_VIEW_NAME = "expenses.update_expense"
+DELETE_EXPENSE_VIEW_NAME = "expenses.delete_expense"
 
 
 def expense_sample(*, user: User, **kwargs) -> Expenses:
@@ -281,3 +282,57 @@ class TestUpdateExpense:
 
         assert response.status_code == 400
         assert error_message == response.json["errors"][field_name][0]
+
+
+class TestDeleteExpense:
+    def test_auth_required(
+            self,
+            test_client,
+            headers_with_access_token,
+            default_expense
+    ) -> None:
+        delete_expense_url = url_for(DELETE_EXPENSE_VIEW_NAME, pk=default_expense.id)
+        response = test_client.delete(delete_expense_url)
+        assert response.status_code == 401
+
+        response = test_client.delete(delete_expense_url, headers=headers_with_access_token)
+        assert response.status_code == 204
+
+    def test_user_can_delete_only_own_expenses(
+            self,
+            test_client,
+            headers_with_access_token,
+            default_user
+    ) -> None:
+        another_user = User(
+            username="another_user",
+        )
+        another_user.set_password("test_password")
+        db.session.add(another_user)
+
+        expense = expense_sample(user=another_user)
+        db.session.add(expense)
+
+        db.session.commit()
+
+        expense_delete_url = url_for(DELETE_EXPENSE_VIEW_NAME, pk=expense.id)
+        response = test_client.patch(
+            expense_delete_url,
+            headers=headers_with_access_token
+        )
+
+        assert expense.user != default_user
+        assert response.status_code == 403
+
+    def test_delete_expense(
+            self,
+            test_client,
+            headers_with_access_token,
+            default_expense
+    ) -> None:
+        delete_url = url_for(DELETE_EXPENSE_VIEW_NAME, pk=default_expense.id)
+        response = test_client.delete(delete_url, headers=headers_with_access_token)
+
+        assert db.session.get(Expenses, default_expense.id) is None
+        assert response.status_code == 204
+        assert response.json is None
