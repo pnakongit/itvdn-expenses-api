@@ -1,11 +1,17 @@
 import os
+from dotenv import load_dotenv
 
 from flask import Flask, Response, jsonify
 from werkzeug.exceptions import NotFound, Unauthorized, Forbidden
 from marshmallow import ValidationError
 
+load_dotenv()
+
 
 def create_app() -> Flask:
+    from dotenv import load_dotenv
+    load_dotenv()
+
     app = Flask(__name__)
 
     config_name = os.getenv("CONFIG_TYPE", default="app.config.DevelopmentConfig")
